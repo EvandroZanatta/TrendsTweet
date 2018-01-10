@@ -1,0 +1,14 @@
+{
+  "name": "TrendsTweet",
+  "version": "1.0.0",
+  "description": "Google Trends on Twitter",
+  "author": "Evandro Zanatta <hemanstifler@gmail.com>",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.16.1",
+    "sqlite3": "^3.1.13"
+  }
+}
