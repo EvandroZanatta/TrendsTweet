@@ -15,8 +15,6 @@ var client = new Twitter({
 	access_token_secret: process.env.ACCESS_TOKEN_SECRET
 });
 
-var db = new sqlite3.Database('posts.db');
-
 var options = { method: 'GET',
   url: 'https://trends.google.com.br/trends/api/stories/latest',
   qs: 
@@ -64,6 +62,8 @@ function getTrendsPost(){
 
 		// percorre todos os posts
 		for (let index = 0; index < 3; index++) {
+
+			var db = new sqlite3.Database('posts.db');
 		
 			var idTrendsPosts = result[index]['id'];
 			
@@ -87,6 +87,8 @@ function getTrendsPost(){
 					postTweet(contentPost);
 				}
 			});
+
+			db.close();
 		}
 
 	});
