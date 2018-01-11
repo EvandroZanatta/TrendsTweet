@@ -11,15 +11,18 @@ var client = new Twitter({
 	consumer_secret: process.env.CONSUMER_SECRET,
 	access_token_key: process.env.ACCESS_TOKEN_KEY,
 	access_token_secret: process.env.ACCESS_TOKEN_SECRET
-  });
+});
 
-  client.post('statuses/update', {status: 'I am a tweet'}, function(error, tweet, response) {
-	if (!error) {
-	  console.log(tweet);
-	}
-  });
-  
-  
+function postTweet(msg){
+	client.post('statuses/update', {status: msg}, function(error, tweet, response) {
+		if (!error) {
+			console.log(tweet);
+		}else{
+			console.log(error);
+		}
+	});
+}
+
 
 var db = new sqlite3.Database('posts.db');
 
@@ -47,7 +50,7 @@ var options = { method: 'GET',
   qs: 
    { hl: 'pt-BR',
      tz: '120',
-     cat: 'b',
+     cat: 't',
      fi: '15',
      fs: '10',
      geo: 'BR',
@@ -65,9 +68,13 @@ request(options, function (error, response, body) {
 
 	/*
 	console.log("Titulo:" + result[0]['articles'][0]['articleTitle']);
-	console.log("URL:" + result[0]['articles'][0]['articleTitle']);
+	console.log("URL:" + result[0]['articles'][0]['url']);
 	console.log("Hastags: #" + result[0]['entityNames'][0] + " #" + result[0]['entityNames'][1]);
 	*/
+	var hash1 = result[0]['entityNames'][0].replace(/[^a-zA-Z]/g, "");
+	var hash2 = result[0]['entityNames'][1].replace(/[^a-zA-Z]/g, "");
+
+	var contentPost = result[0]['articles'][0]['articleTitle'] + " #" + hash1 + " #" + hash2 + " " + result[0]['articles'][0]['url'];
 
 	var idTrendsPosts = result[0]['id'];
 
@@ -82,7 +89,7 @@ request(options, function (error, response, body) {
 				db.run("INSERT INTO posts (id_post, time_int) VALUES (?, ?)", [idTrendsPosts, Date.now()]);
 			});
 
-			// AQUI CHAMA A FUNCAO DE POST
+			postTweet(contentPost);
 		}
 	});
 
