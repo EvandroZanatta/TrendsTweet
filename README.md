@@ -22,6 +22,4 @@ Para dev `npm install` ou produção `npm install --only=production`
 
 Execute o projeto
 
-`node server.js`
-
-Acesse `http://172.17.0.2:8080/` para ver o resultado
+`node server.js` 

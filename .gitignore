@@ -56,7 +56,8 @@ typings/
 # Yarn Integrity file
 .yarn-integrity
 
+# Database of application
+posts.db
+
 # dotenv environment variables file
 .env
-
-posts.db
