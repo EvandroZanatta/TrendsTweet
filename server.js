@@ -1,12 +1,14 @@
 'use strict';
 
 const express = require('express');
-
-var sqlite3 = require('sqlite3').verbose();
-var db = new sqlite3.Database();
-
 var request = require("request");
 
+var sqlite3 = require('sqlite3').verbose();
+var db = new sqlite3.Database('posts.db');
+
+db.serialize(function() {
+	db.run("CREATE TABLE IF NOT EXISTS posts ( id integer PRIMARY KEY, id_post text NOT NULL, status_posted text NOT NULL, time_int integer NOT NULL)");
+});
 
 // Constants
 const PORT = 8080;
@@ -16,10 +18,6 @@ const HOST = '0.0.0.0';
 const app = express();
 app.get('/', (req, res) => {
 	res.send('Hello world\n');
-});
-
-app.get('/install', (req, res) => {
-	res.send('Instalado\n');
 });
 
 /*
