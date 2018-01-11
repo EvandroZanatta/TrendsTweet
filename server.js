@@ -75,7 +75,7 @@ function getTrendsPost(){
 
 					// insere no banco de dados
 					db.serialize(function() {
-						//db.run("INSERT INTO posts (id_post, time_int) VALUES (?, ?)", [idTrendsPosts, Date.now()]);
+						db.run("INSERT INTO posts (id_post, time_int) VALUES (?, ?)", [idTrendsPosts, Date.now()]);
 					});
 
 					// Pegar os dados e gera o tweet
@@ -84,7 +84,7 @@ function getTrendsPost(){
 					var contentPost = result[index]['articles'][0]['articleTitle'] + " #" + hash1 + " #" + hash2 + " " + result[index]['articles'][0]['url'];
 
 					// faz o POST do tweet
-					//postTweet(contentPost);
+					postTweet(contentPost);
 				}
 			});
 		}
