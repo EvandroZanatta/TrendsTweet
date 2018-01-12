@@ -86,9 +86,17 @@ function verifyExist(result, index){
             });
 
             // Pegar os dados e gera o tweet
-            var hash1 = result[index]['entityNames'][0].replace(/[^a-zA-Z]/g, "");
-            var hash2 = result[index]['entityNames'][1].replace(/[^a-zA-Z]/g, "");
-            var contentPost = result[index]['articles'][0]['articleTitle'] + " #" + hash1 + " #" + hash2 + " " + result[index]['articles'][0]['url'];
+            try {
+                var hash1 = "#" + result[index]['entityNames'][0].replace(/[^a-zA-Z]/g, "");
+            }catch (e) {
+                var hash1 = '';
+            }
+            try {
+                var hash2 = "#" + result[index]['entityNames'][1].replace(/[^a-zA-Z]/g, "");
+            }catch (e) {
+                var hash2 = '';
+            }
+            var contentPost = result[index]['articles'][0]['articleTitle'] + " " + hash1 + " " + hash2 + " " + result[index]['articles'][0]['url'];
 
             // faz o POST do tweet
             postTweet(contentPost);
