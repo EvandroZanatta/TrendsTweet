@@ -18,29 +18,32 @@ var client = new Twitter({
 });
 
 var options = { method: 'GET',
-  url: 'https://trends.google.com.br/trends/api/stories/latest',
-  qs: 
-   { hl: 'pt-BR',
-     tz: '120',
-     cat: 't',
-     fi: '15',
-     fs: '10',
-     geo: 'BR',
-     ri: '3',
-     rs: '3',
-     sort: '0' },
-  headers: 
-   {'cache-control': 'no-cache' } };
+    url: 'https://trends.google.com.br/trends/api/stories/latest',
+    qs: 
+    { 
+        hl: 'pt-BR',
+        tz: '120',
+        cat: 't',
+        fi: '15',
+        fs: '10',
+        geo: 'BR',
+        ri: '3',
+        rs: '3',
+        sort: '0' 
+    }, headers: {
+        'cache-control': 'no-cache' 
+    } 
+};
 
 /* --- Criacao do banco na primeira execucao --- */
 
 db.serialize(function() {
-	db.run("CREATE TABLE IF NOT EXISTS posts \
-		( \
-			id integer PRIMARY KEY, \
-			id_post text NOT NULL, \
-			time_int integer NOT NULL)\
-		");
+    db.run("CREATE TABLE IF NOT EXISTS posts \
+        ( \
+            id integer PRIMARY KEY, \
+            id_post text NOT NULL, \
+            time_int integer NOT NULL)\
+    ");
 });
 
 /* --- Funcoes do projeto --- */
@@ -48,70 +51,70 @@ db.serialize(function() {
 // faz o tweet com a noticias
 function postTweet(msg){
 
-	console.log("Inserindo post: " + msg);
+    console.log("Postando tweet: " + msg);
 
-	client.post('statuses/update', {status: msg}, function(error, tweet, response) {
-		if (error) {
-			console.log(error);
-		}
-	});
+    client.post('statuses/update', {status: msg}, function(error, tweet, response) {
+        if (error) {
+            console.log(error);
+        }
+    });
 }
 
 /*
-	verifica se o post ja existe, se nao existir 
-	faz a publicacao de um novo tweet
+    verifica se o post ja existe, se nao existir 
+    faz a publicacao de um novo tweet
 */
 function verifyExist(result, index){
 
-	console.log("index: " + index);
-	console.log("id: "+ result[index]['id']);
+    console.log("index: " + index);
+    console.log("id: "+ result[index]['id']);
 
-	var idTrendsPosts = result[index]['id'];
-	
-	// busca por todas as linhas que possuem o id do post
-	db.all("SELECT id_post FROM posts WHERE id_post = '" + idTrendsPosts + "'", function(err, allRows) {
-		
-		// Se nao existir no banco o id registrado
-		if(allRows.length == 0){
+    var idTrendsPosts = result[index]['id'];
 
-			console.log(idTrendsPosts);
+    // busca por todas as linhas que possuem o id do post
+    db.all("SELECT id_post FROM posts WHERE id_post = '" + idTrendsPosts + "'", function(err, allRows) {
 
-			// Insere no banco de dados
-			db.serialize(function() {
-				console.log('inserindo');
-				db.run("INSERT INTO posts (id_post, time_int) VALUES (?, ?)", [idTrendsPosts, Date.now()]);
-			});
+        // Se nao existir no banco o id registrado
+        if(allRows.length == 0){
 
-			// Pegar os dados e gera o tweet
-			var hash1 = result[index]['entityNames'][0].replace(/[^a-zA-Z]/g, "");
-			var hash2 = result[index]['entityNames'][1].replace(/[^a-zA-Z]/g, "");
-			var contentPost = result[index]['articles'][0]['articleTitle'] + " #" + hash1 + " #" + hash2 + " " + result[index]['articles'][0]['url'];
+            console.log(idTrendsPosts);
 
-			// faz o POST do tweet
-			postTweet(contentPost);
-		}
-	});
+            // Insere no banco de dados
+            db.serialize(function() {
+                console.log('Inserindo no banco');
+                db.run("INSERT INTO posts (id_post, time_int) VALUES (?, ?)", [idTrendsPosts, Date.now()]);
+            });
+
+            // Pegar os dados e gera o tweet
+            var hash1 = result[index]['entityNames'][0].replace(/[^a-zA-Z]/g, "");
+            var hash2 = result[index]['entityNames'][1].replace(/[^a-zA-Z]/g, "");
+            var contentPost = result[index]['articles'][0]['articleTitle'] + " #" + hash1 + " #" + hash2 + " " + result[index]['articles'][0]['url'];
+
+            // faz o POST do tweet
+            postTweet(contentPost);
+        }
+    });
 }
 
 function getTrendsPost(){
 
-	// faz a chamada na API do Google Trends para pegar os posts
-	request(options, function (error, response, body) {
-		if (error) throw new Error(error);
-			
-		var result = JSON.parse(body.slice(5));
-		result = result['storySummaries']['trendingStories'];
+    // faz a chamada na API do Google Trends para pegar os posts
+    request(options, function (error, response, body) {
+    if (error) throw new Error(error);
 
-		// percorre todos os posts
-		for (let index = 0; index < 3; index++) {
+        var result = JSON.parse(body.slice(5));
+        result = result['storySummaries']['trendingStories'];
 
-			// para cada noticia, chama a funcao para verificar se o post existe
-			verifyExist(result, index);	
-		}
+        // percorre todos os posts
+        for (let index = 0; index < 3; index++) {
 
-	});
+            // para cada noticia, chama a funcao para verificar se o post existe
+            verifyExist(result, index);	
+        }
+
+    });
 }
-	
+
 /* --- Autorun --- */
 
 console.log("RUN...");
@@ -121,5 +124,5 @@ getTrendsPost();
 
 // a cadas 2 minutos refaz a chama de post
 setInterval(function(e){
-	getTrendsPost();
+    getTrendsPost();
 }, 180000);
